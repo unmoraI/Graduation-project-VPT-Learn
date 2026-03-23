@@ -1,25 +1,38 @@
 import 'package:flutter/material.dart';
+import 'courses_screen.dart';
+import 'information_base_screen.dart';
+import 'profile_screen.dart';
 import '../theme.dart';
 
-class HomeScreen extends StatelessWidget {
-  final int currentIndex;
-  final List<Widget> pages;
-  final void Function(int) onTap;
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-  const HomeScreen({
-    super.key,
-    required this.currentIndex,
-    required this.pages,
-    required this.onTap,
-  });
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = const [
+    LearningTab(),
+    KnowledgeBasePage(),
+    ProfilePage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: pages[currentIndex],
+      body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: onTap,
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
         backgroundColor: AppColors.primaryBackground,
         selectedItemColor: AppColors.alternate,
         unselectedItemColor: AppColors.secondaryText,

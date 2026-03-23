@@ -1,34 +1,50 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import 'lessons_screen.dart';
 
-// Локальная модель данных для UI, не зависит от бэкенда
-class CourseData {
-  final int id;
-  final String title;
-  final String description;
-  final double progress;
+class LearningTab extends StatefulWidget {
+  const LearningTab({super.key});
 
-  const CourseData({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.progress,
-  });
+  @override
+  State<LearningTab> createState() => _LearningTabState();
 }
 
-class LearningTab extends StatelessWidget {
-  final List<CourseData> courses;
-  final bool isLoading;
-  final VoidCallback onRefresh;
-  final void Function(int courseId) onCourseTap;
+class _LearningTabState extends State<LearningTab> {
+  List<Course> courses = const [
+    Course(
+      id: 1,
+      title: 'Основы Flutter',
+      description: 'Изучите базовые виджеты и структуру приложения.',
+      progress: 0.3,
+    ),
+    Course(
+      id: 2,
+      title: 'Продвинутый Dart',
+      description: 'Глубокое погружение в язык Dart и его фичи.',
+      progress: 0.6,
+    ),
+    Course(
+      id: 3,
+      title: 'Работа с БД',
+      description: 'Основы работы с локальными и удалёнными БД.',
+      progress: 0.0,
+    ),
+  ];
 
-  const LearningTab({
-    super.key,
-    required this.courses,
-    required this.isLoading,
-    required this.onRefresh,
-    required this.onCourseTap,
-  });
+  bool isLoading = false;
+
+  void _openLessonsScreen(int courseId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LessonsScreen(courseId: courseId),
+      ),
+    );
+  }
+
+  Future<void> _refresh() async {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +55,7 @@ class LearningTab extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: onRefresh,
+            onPressed: _refresh,
           ),
         ],
       ),
@@ -71,7 +87,7 @@ class LearningTab extends StatelessWidget {
                             const SizedBox(height: 12),
                             LinearProgressIndicator(
                               value: course.progress,
-                              backgroundColor: AppColors.alternate,
+                              backgroundColor: Colors.grey[300],
                               color: AppColors.completed,
                             ),
                             const SizedBox(height: 4),
@@ -84,11 +100,25 @@ class LearningTab extends StatelessWidget {
                             ),
                           ],
                         ),
-                        onTap: () => onCourseTap(course.id),
+                        onTap: () => _openLessonsScreen(course.id),
                       ),
                     );
                   },
                 ),
     );
   }
+}
+
+class Course {
+  final int id;
+  final String title;
+  final String description;
+  final double progress;
+
+  const Course({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.progress,
+  });
 }

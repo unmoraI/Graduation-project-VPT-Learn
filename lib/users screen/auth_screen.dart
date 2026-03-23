@@ -1,31 +1,71 @@
 import 'package:flutter/material.dart';
+import 'home_screen.dart';
 import '../theme.dart';
+import '../admin screens/admin_screen.dart';
 
-class AuthPage extends StatelessWidget {
-  final TabController tabController;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final TextEditingController confirmPasswordController;
-  final bool passwordObscured;
-  final bool confirmPasswordObscured;
-  final VoidCallback onTogglePasswordObscure;
-  final VoidCallback onToggleConfirmPasswordObscure;
-  final VoidCallback onCreateAccount;
-  final VoidCallback onLogin;
+class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
 
-  const AuthPage({
-    super.key,
-    required this.tabController,
-    required this.emailController,
-    required this.passwordController,
-    required this.confirmPasswordController,
-    required this.passwordObscured,
-    required this.confirmPasswordObscured,
-    required this.onTogglePasswordObscure,
-    required this.onToggleConfirmPasswordObscure,
-    required this.onCreateAccount,
-    required this.onLogin,
-  });
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> createAccount() async {
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Пароли не совпадают')),
+      );
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
+    );
+  }
+
+  Future<void> login() async {
+    final email = _emailController.text.trim();
+
+    if (email.toLowerCase().contains('admin')) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AdminScreen()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +82,7 @@ class AuthPage extends StatelessWidget {
                 const SizedBox(height: 24),
                 CircleAvatar(
                   radius: 48,
-                  backgroundColor: AppColors.secondaryBackground,
+                  backgroundColor: Colors.white12,
                   child: const Icon(Icons.book, size: 48, color: Colors.white),
                 ),
                 const SizedBox(height: 14),
@@ -57,20 +97,20 @@ class AuthPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 TabBar(
-                  controller: tabController,
+                  controller: _tabController,
                   tabs: const [
                     Tab(text: "Создать аккаунт"),
                     Tab(text: "Войти"),
                   ],
                   indicatorColor: AppColors.alternate,
-                  labelColor: AppColors.alternate,
-                  unselectedLabelColor: AppColors.alternate,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.white54,
                 ),
                 const SizedBox(height: 18),
                 SizedBox(
                   height: 400,
                   child: TabBarView(
-                    controller: tabController,
+                    controller: _tabController,
                     children: [
                       _buildCreateAccount(),
                       _buildLogin(),
@@ -103,25 +143,18 @@ class AuthPage extends StatelessWidget {
           style: TextStyle(fontSize: 14, color: AppColors.secondaryText),
         ),
         const SizedBox(height: 24),
-        _buildInputField(
-          label: "Email",
-          controller: emailController,
-        ),
+        _buildInputField(label: "Email", controller: _emailController),
         const SizedBox(height: 20),
         _buildInputField(
           label: "Пароль",
           isPassword: true,
-          controller: passwordController,
-          obscureText: passwordObscured,
-          onToggleObscure: onTogglePasswordObscure,
+          controller: _passwordController,
         ),
         const SizedBox(height: 20),
         _buildInputField(
           label: "Подтверждение пароля",
           isPassword: true,
-          controller: confirmPasswordController,
-          obscureText: confirmPasswordObscured,
-          onToggleObscure: onToggleConfirmPasswordObscure,
+          controller: _confirmPasswordController,
         ),
         const SizedBox(height: 32),
         SizedBox(
@@ -134,7 +167,7 @@ class AuthPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
-            onPressed: onCreateAccount,
+            onPressed: createAccount,
             child: const Text(
               "Зарегистрироваться",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -159,17 +192,12 @@ class AuthPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        _buildInputField(
-          label: "Email",
-          controller: emailController,
-        ),
+        _buildInputField(label: "Email", controller: _emailController),
         const SizedBox(height: 20),
         _buildInputField(
           label: "Пароль",
           isPassword: true,
-          controller: passwordController,
-          obscureText: passwordObscured,
-          onToggleObscure: onTogglePasswordObscure,
+          controller: _passwordController,
         ),
         const SizedBox(height: 32),
         SizedBox(
@@ -182,7 +210,7 @@ class AuthPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
-            onPressed: onLogin,
+            onPressed: login,
             child: const Text(
               "Войти",
               style: TextStyle(
@@ -201,12 +229,10 @@ class AuthPage extends StatelessWidget {
     required String label,
     bool isPassword = false,
     TextEditingController? controller,
-    bool obscureText = false,
-    VoidCallback? onToggleObscure,
   }) {
     return TextField(
       controller: controller,
-      obscureText: isPassword ? obscureText : false,
+      obscureText: isPassword,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
@@ -216,13 +242,7 @@ class AuthPage extends StatelessWidget {
           borderSide: BorderSide.none,
         ),
         suffixIcon: isPassword
-            ? IconButton(
-                icon: Icon(
-                  obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.secondaryText,
-                ),
-                onPressed: onToggleObscure,
-              )
+            ? Icon(Icons.visibility_off, color: AppColors.secondaryText)
             : null,
         labelStyle: TextStyle(color: AppColors.secondaryText),
       ),

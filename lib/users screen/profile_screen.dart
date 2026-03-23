@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
+import 'auth_screen.dart';
 import '../theme.dart';
 
 class ProfilePage extends StatelessWidget {
-  final VoidCallback onLogout;
-
-  const ProfilePage({
-    super.key,
-    required this.onLogout,
-  });
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +14,29 @@ class ProfilePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.white12,
+              child: Icon(Icons.person, size: 60, color: AppColors.secondaryText),
+            ),
             const SizedBox(height: 16),
+            Text(
+              'name',
+              style: TextStyle(
+                fontSize: 22,
+                color: AppColors.primaryText,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '[Email]',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.secondaryText.withAlpha(153),
+              ),
+            ),
             const SizedBox(height: 32),
             Align(
               alignment: Alignment.centerLeft,
@@ -33,10 +51,21 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _buildSettingsItem(
+              icon: Icons.edit,
+              title: 'Profile Settings',
+              trailingText: 'Edit Profile',
+              onTap: () {},
+            ),
+            _buildSettingsItem(
               icon: Icons.logout,
               title: 'Log out of account',
               trailingText: 'Log Out?',
-              onTap: onLogout,
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AuthPage()),
+                );
+              },
             ),
           ],
         ),
@@ -64,7 +93,7 @@ class ProfilePage extends StatelessWidget {
                   : null),
           onTap: onTap,
         ),
-        const Divider(color: AppColors.secondary, height: 1),
+        const Divider(color: Colors.white12, height: 1),
       ],
     );
   }
