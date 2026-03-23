@@ -1,51 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:vpt_learn/models/course_model.dart';
-import 'package:vpt_learn/services/course_service.dart';
 import '../theme.dart';
-import 'lessons_screen.dart';
 
-class LearningTab extends StatefulWidget {
-  const LearningTab({super.key});
+// Локальная модель данных для UI, не зависит от бэкенда
+class CourseData {
+  final int id;
+  final String title;
+  final String description;
+  final double progress;
 
-  @override
-  State<LearningTab> createState() => _LearningTabState();
-  
+  const CourseData({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.progress,
+  });
 }
 
-class _LearningTabState extends State<LearningTab> {
-  List<CourseModel> courses =  [];
+class LearningTab extends StatelessWidget {
+  final List<CourseData> courses;
+  final bool isLoading;
+  final VoidCallback onRefresh;
+  final void Function(int courseId) onCourseTap;
 
-  bool isLoading = true;
-  @override
-  void initState() {
-    super.initState();
-    _loadCourses();
-  }
-
-  Future<void> _loadCourses() async {
-    setState(() => isLoading = true);
-
-    try {
-      courses = await CourseService().fetchCourses();
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-
-    setState(() => isLoading = false);
-  }
-
-  void _openLessonsScreen(int courseId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LessonsScreen(courseId: courseId),
-      ),
-    );
-  }
-
-  Future<void> _refresh() async {
-    setState(() {});
-  }
+  const LearningTab({
+    super.key,
+    required this.courses,
+    required this.isLoading,
+    required this.onRefresh,
+    required this.onCourseTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +39,7 @@ class _LearningTabState extends State<LearningTab> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _refresh,
+            onPressed: onRefresh,
           ),
         ],
       ),
@@ -87,13 +70,13 @@ class _LearningTabState extends State<LearningTab> {
                             Text(course.description),
                             const SizedBox(height: 12),
                             LinearProgressIndicator(
-                              value: course.progress ?? 0,
+                              value: course.progress,
                               backgroundColor: AppColors.alternate,
                               color: AppColors.completed,
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${((course.progress ?? 0) * 100).toInt()}% завершено',
+                              '${(course.progress * 100).toInt()}% завершено',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.completed,
@@ -101,25 +84,11 @@ class _LearningTabState extends State<LearningTab> {
                             ),
                           ],
                         ),
-                        onTap: () => _openLessonsScreen(course.id),
+                        onTap: () => onCourseTap(course.id),
                       ),
                     );
                   },
                 ),
     );
   }
-}
-
-class Course {
-  final int id;
-  final String title;
-  final String description;
-  final double progress;
-
-  const Course({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.progress,
-  });
 }

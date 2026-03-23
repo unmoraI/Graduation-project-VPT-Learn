@@ -1,103 +1,31 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import '../services/access_token_storage.dart';
-import 'home_screen.dart';
 import '../theme.dart';
-import '../admin_screens/admin_screen.dart';
 
-class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
+class AuthPage extends StatelessWidget {
+  final TabController tabController;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
+  final bool passwordObscured;
+  final bool confirmPasswordObscured;
+  final VoidCallback onTogglePasswordObscure;
+  final VoidCallback onToggleConfirmPasswordObscure;
+  final VoidCallback onCreateAccount;
+  final VoidCallback onLogin;
 
-  @override
-  State<AuthPage> createState() => _AuthPageState();
-}
-
-class _AuthPageState extends State<AuthPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
-
-  bool _passwordObscured = true;
-  bool _confirmPasswordObscured = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-
-Future<void> createAccount() async {
-  final email = _emailController.text.trim();
-  final password = _passwordController.text.trim();
-  final confirmPassword = _confirmPasswordController.text.trim();
-
-  if (password != confirmPassword) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Пароли не совпадают')),
-    );
-    return;
-  }
-
-  try {
-    final result = await AuthService().register(email, password);
-    // После регистрации можно сохранить accessToken, userId
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(e.toString())),
-    );
-  }
-}
-
-Future<void> login() async {
-  final email = _emailController.text.trim();
-  final password = _passwordController.text.trim();
-
-  try {
-    final result = await AuthService().login(email, password);
-      
-await AccessTokenStorage.saveTokens(
-      accessToken: result?['accessToken'],
-      refreshToken: result?['refreshToken'],
-    );
-
-    print('Access Token saved: ${result?['accessToken']}');
-    // result содержит: userId, email, accessToken, refreshToken, role
-    if (result["role"] == "админ") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) =>  AdminScreen()),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) =>  HomeScreen()),
-      );
-    }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(e.toString())),
-    );
-  }
-}
-
+  const AuthPage({
+    super.key,
+    required this.tabController,
+    required this.emailController,
+    required this.passwordController,
+    required this.confirmPasswordController,
+    required this.passwordObscured,
+    required this.confirmPasswordObscured,
+    required this.onTogglePasswordObscure,
+    required this.onToggleConfirmPasswordObscure,
+    required this.onCreateAccount,
+    required this.onLogin,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +57,7 @@ await AccessTokenStorage.saveTokens(
                 ),
                 const SizedBox(height: 18),
                 TabBar(
-                  controller: _tabController,
+                  controller: tabController,
                   tabs: const [
                     Tab(text: "Создать аккаунт"),
                     Tab(text: "Войти"),
@@ -142,7 +70,7 @@ await AccessTokenStorage.saveTokens(
                 SizedBox(
                   height: 400,
                   child: TabBarView(
-                    controller: _tabController,
+                    controller: tabController,
                     children: [
                       _buildCreateAccount(),
                       _buildLogin(),
@@ -177,31 +105,23 @@ await AccessTokenStorage.saveTokens(
         const SizedBox(height: 24),
         _buildInputField(
           label: "Email",
-          controller: _emailController,
+          controller: emailController,
         ),
         const SizedBox(height: 20),
         _buildInputField(
           label: "Пароль",
           isPassword: true,
-          controller: _passwordController,
-          obscureText: _passwordObscured,
-          onToggleObscure: () {
-            setState(() {
-              _passwordObscured = !_passwordObscured;
-            });
-          },
+          controller: passwordController,
+          obscureText: passwordObscured,
+          onToggleObscure: onTogglePasswordObscure,
         ),
         const SizedBox(height: 20),
         _buildInputField(
           label: "Подтверждение пароля",
           isPassword: true,
-          controller: _confirmPasswordController,
-          obscureText: _confirmPasswordObscured,
-          onToggleObscure: () {
-            setState(() {
-              _confirmPasswordObscured = !_confirmPasswordObscured;
-            });
-          },
+          controller: confirmPasswordController,
+          obscureText: confirmPasswordObscured,
+          onToggleObscure: onToggleConfirmPasswordObscure,
         ),
         const SizedBox(height: 32),
         SizedBox(
@@ -214,7 +134,7 @@ await AccessTokenStorage.saveTokens(
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
-            onPressed: createAccount,
+            onPressed: onCreateAccount,
             child: const Text(
               "Зарегистрироваться",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -241,19 +161,15 @@ await AccessTokenStorage.saveTokens(
         const SizedBox(height: 24),
         _buildInputField(
           label: "Email",
-          controller: _emailController,
+          controller: emailController,
         ),
         const SizedBox(height: 20),
         _buildInputField(
           label: "Пароль",
           isPassword: true,
-          controller: _passwordController,
-          obscureText: _passwordObscured,
-          onToggleObscure: () {
-            setState(() {
-              _passwordObscured = !_passwordObscured;
-            });
-          },
+          controller: passwordController,
+          obscureText: passwordObscured,
+          onToggleObscure: onTogglePasswordObscure,
         ),
         const SizedBox(height: 32),
         SizedBox(
@@ -266,7 +182,7 @@ await AccessTokenStorage.saveTokens(
                 borderRadius: BorderRadius.circular(24),
               ),
             ),
-            onPressed: login,
+            onPressed: onLogin,
             child: const Text(
               "Войти",
               style: TextStyle(
@@ -277,7 +193,6 @@ await AccessTokenStorage.saveTokens(
             ),
           ),
         ),
-         
       ],
     );
   }

@@ -1,41 +1,28 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
-import 'admin_courses_screen.dart';
-import 'admin_users_screen.dart';
-import 'package:vpt_learn/users_screen/profile_screen.dart';
 
-class AdminScreen extends StatefulWidget {
-  const AdminScreen({super.key});
+class AdminScreen extends StatelessWidget {
+  final int currentIndex;
+  final List<Widget> pages;
+  final void Function(int) onTap;
 
-  @override
-  State<AdminScreen> createState() => _AdminScreenState();
-}
-
-class _AdminScreenState extends State<AdminScreen> {
-  int _currentIndex = 0;
-
-  final List<Widget> _pages = const [
-    AdminUsersScreen(),
-    AdminCoursesScreen(),
-    ProfilePage(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
+  const AdminScreen({
+    super.key,
+    required this.currentIndex,
+    required this.pages,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: pages[currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: currentIndex,
         backgroundColor: AppColors.primaryBackground,
         selectedItemColor: AppColors.alternate,
         unselectedItemColor: AppColors.secondaryText,
-        onTap: _onItemTapped,
+        onTap: onTap,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.people),

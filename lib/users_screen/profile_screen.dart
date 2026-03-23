@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'auth_screen.dart';
 import '../theme.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  final VoidCallback onLogout;
+
+  const ProfilePage({
+    super.key,
+    required this.onLogout,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +36,7 @@ class ProfilePage extends StatelessWidget {
               icon: Icons.logout,
               title: 'Log out of account',
               trailingText: 'Log Out?',
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AuthPage()),
-                );
-              },
+              onTap: onLogout,
             ),
           ],
         ),
